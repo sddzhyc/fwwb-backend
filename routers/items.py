@@ -36,15 +36,6 @@ def update_item(item_id: int, item: Item):
     return {"item_price": item.price, "item_id": item_id}
 
 
-@router.post("/upload/")
-async def upload_file(file: UploadFile ):
-    file_contents = await file.read()
-    # 你可以在这里处理文件内容，例如保存到磁盘或者存储到数据库
-    #保存到磁盘
-    with open(file.filename, "wb") as f:
-        f.write(file_contents)
-    return {"filename": file.filename}
-
 @router.post("/login")
 async def login(username: str, password: str, vertify: Optional[str] = None):
     return {"username": username, "password": password}

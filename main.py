@@ -2,14 +2,34 @@ from fastapi import Depends, FastAPI
 from redis import asyncio as aioredis
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+
+from app.routers import resume
+#解决跨域问题
+origins = [
+    "http://localhost",
+    "http://localhost:8080",
+    "http://localhost:5173",
+    "http://localhost:3000", # react+vite
+    "http://localhost:5174",
+]
 
 # from .dependencies import get_query_token, get_token_header
-from .routers import items,Login_v2,job
+from .routers import items,Login_v2,job 
 from .utils.db import create_db_and_tables
 # app = FastAPI(dependencies=[Depends(create_db_and_tables)])
-app = FastAPI()
+app = FastAPI() 
+# app.mount("/static", StaticFiles(directory="templates"), name="static")
+app.mount("/static", StaticFiles(directory="dist"), name="static")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# app = FastAPI()
 @app.on_event("startup")
 async def startup_event():
     create_db_and_tables()
@@ -31,6 +51,7 @@ async def startup_event():
 app.include_router(items.router)
 app.include_router(Login_v2.router)
 app.include_router(job.router)
+app.include_router(resume.router)
 # app.include_router(
 #     admin.router,
 #     prefix="/admin",
