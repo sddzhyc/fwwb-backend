@@ -1,5 +1,7 @@
 
-from typing import List
+from typing import List, Optional
+from fastapi import HTTPException
+from requests import session
 from rsa import verify
 # from fastapi import Depends, FastAPI, HTTPException, Query
 from sqlmodel import Field, Relationship, Session, SQLModel, create_engine, select
@@ -15,19 +17,24 @@ from app.model.job import JobRead
 class UserReadWithjobs(UserRead):
     jobs: List[JobRead] = []
 
-def getUser(username: str):
-    with getSession() as session:
-    # session = getSession()
-        user = session.exec(select(User).where(User.username == username)).first()
-    return user
+class UserService:
+    def __init__(self, session: Session):
+        self.session = session
+
+    def getUser(self, username: str) -> User | None:
+        # with getSession() as session: 
+        session2 = getSession()
+        user = session2.exec(select(User).where(User.username == username)).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return user
 
 # 通过用户名获取用户，但是不返回密码，可用于验证用户是否登录
 def vertifyUser(username: str):
     with getSession() as session:
     # session = getSession()
         user = session.exec(select(User).where(User.username == username)).first()
-        
-    user = UserRead.model_validate(user)
+        user = UserRead.model_validate(user)
     return user
 
 def initUser():
@@ -38,14 +45,14 @@ def initUser():
         session.commit()
 
 def updateUser(user: User):
-    
     with getSession() as session:
         session.add(user)
         session.commit()
 
-def createUser(user: UserCreate):
+def createUser(userCreate: UserCreate):
     with getSession() as session:
-        db_user = User.model_validate(user) 
+        # db_user = User.model_validate(user, update={"company_id": companyId}) 
+        db_user = User.model_validate(userCreate )
         session.add(db_user)
         session.commit()
         session.refresh(db_user)

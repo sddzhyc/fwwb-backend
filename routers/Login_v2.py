@@ -9,9 +9,13 @@ from pydantic import BaseModel
 
 from fastapi import APIRouter
 
+from requests import session
 from rsa import verify
+from sqlmodel import Session
 
-from app.model.user import getUser,createUser,UserCreate, UserRead
+from app.model.model import UserReadWithCompany
+from app.model.user import UserService, createUser,UserCreate, UserRead
+from app.utils.db import get_session
 
 router = APIRouter()
 
@@ -68,8 +72,9 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-def authenticate_user(username: str, password: str):
-    user = getUser( username)
+def authenticate_user(username: str, password: str ,session: Session = Depends(get_session) ) :
+    userService = UserService(session)
+    user = userService.getUser( username)
     if not user:
         return False
     if not verify_password(password, user.password):
@@ -88,7 +93,7 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
     return encoded_jwt
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(token: str = Depends(oauth2_scheme ), Session : Session = Depends(get_session)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -103,7 +108,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     except JWTError:
         raise credentials_exception
     # user = get_user(fake_users_db, username=token_data.username)
-    user = getUser(username=token_data.username)
+    userService = UserService(Session)
+    user = userService.getUser(token_data.username)
     
     if user is None:
         raise credentials_exception
@@ -142,8 +148,9 @@ async def register(user: UserCreate):
     return createUser(user)
 
 
-@router.get("/users/me/", response_model=User)
+@router.get("/users/me/", response_model=UserReadWithCompany)
 async def read_users_me(current_user: User = Depends(get_current_active_user)):
+    # print(current_user)
     return current_user
 
 

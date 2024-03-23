@@ -1,27 +1,36 @@
 from fastapi import FastAPI, HTTPException
 from sqlmodel import SQLModel, Session, create_engine, select
 from typing import Optional, List
-
-from app.model.model import Job, User, UserRead
-
+from app.model.model import Job
+from .model import CompanyRead
+from .model import UserReadWithCompany
 class JobRead(SQLModel):
     id: int
     title: str
     description: Optional[str]
     user_id: int
+    maxSalary: int
+    minSalary: int
+    education: int
     # username : str
 
 class Jobcreate(SQLModel):
     title: str
+    maxSalary: int
+    minSalary: int
+    education: int
     description: str
 
 class JobUpdate(SQLModel):
+    maxSalary: Optional[int] = None
+    minSalary: Optional[int] = None
+    education: Optional[int] = None
     title: Optional[str] = None
     description: Optional[str] = None
 
 
 class JobReadWithUser(JobRead):
-    user: Optional[UserRead] = None
+    user: Optional[UserReadWithCompany] = None
 
 class JobService:
     def __init__(self, session: Session):
@@ -34,7 +43,7 @@ class JobService:
         return job
 
     def create_job(self, jobCreate: Jobcreate, user_id: int):
-        db_job = Job.model_validate(jobCreate, update={"user_id": user_id}) # 从jobCreate创建一个从jobCreate创建一个Job实例，但忽略实例，但忽略Job中没有的属性
+        db_job = Job.model_validate(jobCreate, update={"user_id": user_id}) # 从jobCreate创建一个从jobCreate创建一个Job实例，但忽略Job中没有的属性
         # 以下写法也可以
         # db_job = Job.model_validate(jobCreate)
         # db_job.user_id = user_id

@@ -5,7 +5,7 @@ from fastapi_cache.backends.redis import RedisBackend
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.routers import resume
+from app.routers import company, resume
 #解决跨域问题
 origins = [
     "http://localhost",
@@ -52,6 +52,7 @@ app.include_router(items.router)
 app.include_router(Login_v2.router)
 app.include_router(job.router)
 app.include_router(resume.router)
+app.include_router(company.router)
 # app.include_router(
 #     admin.router,
 #     prefix="/admin",
