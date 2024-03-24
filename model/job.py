@@ -1,27 +1,18 @@
 from fastapi import FastAPI, HTTPException
-from sqlmodel import SQLModel, Session, create_engine, select
-from typing import Optional, List
-from app.model.model import Job
+from sqlmodel import Session, create_engine, select
+from typing import Optional
+from app.model.model import Job, JobBase
 from .model import CompanyRead
 from .model import UserReadWithCompany
-class JobRead(SQLModel):
+class JobRead(JobBase):
     id: int
-    title: str
-    description: Optional[str]
-    user_id: int
-    maxSalary: int
-    minSalary: int
-    education: int
-    # username : str
+    # description: Optional[str] = None
+class Jobcreate(JobBase):
+    pass
 
-class Jobcreate(SQLModel):
-    title: str
-    maxSalary: int
-    minSalary: int
-    education: int
-    description: str
-
-class JobUpdate(SQLModel):
+class JobUpdate(JobBase):
+    maxSalary: Optional[int] = None
+    jobType: Optional[int] = None
     maxSalary: Optional[int] = None
     minSalary: Optional[int] = None
     education: Optional[int] = None
