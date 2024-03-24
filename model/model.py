@@ -1,7 +1,6 @@
 from typing import List, Optional
 from sqlalchemy import Join
 from sqlmodel import Field, Relationship, Session, SQLModel, create_engine, select
-from yaml import safe_load_all
 
 from app.model import company
 
