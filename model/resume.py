@@ -11,6 +11,7 @@ from pymongo.server_api import ServerApi
 from fastapi import HTTPException
 from bson.objectid import ObjectId
 from app.routers import resume
+from app.utils.encrypt import CrypteService
 
 def createClient():
     # uriDemo = "mongodb+srv://root:<password>@demo.mysl5zj.mongodb.net/"
@@ -79,7 +80,8 @@ class ResumeService:
     def __init__(self, client ) -> None:
         self.client = client
         self.db = client["fwwb"]
-        self.collection = self.db["resume"]
+        # self.collection = self.db["resume"]
+        self.collection = self.db["resume_encrypted"]
     
     def create_resume(self, resume: ResumeCreate, user_id : int):
         #TODO:实现不把user_id设为Optional就可验证的方法
@@ -89,7 +91,12 @@ class ResumeService:
         # print("type:",user_id,type(user_id))
         db_resume = Resume.model_validate(resumeData)
         # db_resume.user_id = user_id
-        InsertOneResult = self.collection.insert_one(db_resume.model_dump())
+        db_resumeData = db_resume.model_dump()
+        # 加密
+        crypteService = CrypteService()
+        db_resumeData_encrypted = crypteService.encrypt_dict(db_resumeData)
+        
+        InsertOneResult = self.collection.insert_one(db_resumeData_encrypted)
         res = ResumeResponse(resume_id = str(InsertOneResult.inserted_id), isAknowledged = InsertOneResult.acknowledged)
         return res
     
@@ -97,7 +104,10 @@ class ResumeService:
         resumes_cursor = self.collection.find({"user_id": user_id})
         if resumes_cursor:
             resumes : List[Resume] = [] 
-            for resume in resumes_cursor: #修改resume 不会修改resumes_cursor！！！
+            for resume_encrypted in resumes_cursor: #修改resume 不会修改resumes_cursor！！！
+                #解密
+                crypteService = CrypteService()
+                resume = crypteService.decrypt_dict(resume_encrypted)
                 resume["resume_id"] = str(resume["_id"]) # 将ObjectId转为str
                 resumes.append(Resume.model_validate(resume))
             # resumes = [Resume.model_validate(resumeData) for resumeData in resumes_cursor]
@@ -108,7 +118,10 @@ class ResumeService:
 
     def get_resume(self, resume_id: str):
         id_to_find = ObjectId(resume_id)
-        resume = self.collection.find_one({"_id": id_to_find})
+        resume_encrypted = self.collection.find_one({"_id": id_to_find})
+        #解密
+        crypteService = CrypteService()
+        resume = crypteService.decrypt_dict(resume_encrypted)
         # print("resume:",resume)
         if resume:
             resume["resume_id"] = str(resume["_id"])
@@ -117,13 +130,17 @@ class ResumeService:
             return resumeClass
         else:
             raise HTTPException(status_code=404, detail="Resume not found")
+    
     #TODO:目前会修改所有字段，需要修改为只修改传入的字段
     def update_resume(self, resume_id: str, resume: ResumeUpdate):
         
         id_to_find = ObjectId(resume_id)
         existing_resume = self.collection.find_one({"_id": id_to_find})
         if existing_resume:
-            self.collection.update_one({"_id": id_to_find}, {"$set": resume.dict()})
+            # 加密
+            crypteService = CrypteService()
+            db_resumeData_encrypted = crypteService.encrypt_dict(resume.model_dump())
+            self.collection.update_one({"_id": id_to_find}, {"$set": db_resumeData_encrypted})
             ResumeUpdated = self.get_resume(id_to_find)
             return ResumeUpdated
         else:

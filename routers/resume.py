@@ -13,7 +13,14 @@ from app.routers.Login_v2 import get_current_active_user
 from app.utils.noSQL import createClient
 from ..model.model import User
 
-router = APIRouter()
+router = APIRouter(
+    # prefix="/resumes",
+    tags=["resumes"],
+    dependencies=[Depends(get_current_active_user)],
+    responses={404: {"description": "Not found"}},
+)
+
+
 @router.post("/upload")
 async def upload_file(file: UploadFile ):
     file_contents = await file.read()
