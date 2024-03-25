@@ -17,14 +17,18 @@ class Company(SQLModel, table=True):
     users:List["User"] = Relationship(back_populates="company")
     # jobs: List["Job"] = Relationship(back_populates="company") #job和company无外键关联就不能加这个字段
 
-class User(SQLModel,table = True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    password: Optional[str] = None
+class UserBase(SQLModel):
+
     username: Optional[str] = None
+    userType: Optional[int] = None #用户类型，0：求职人员，1：招聘人员
     email: Optional[str] = None
     full_name: Optional[str] = None
-    disabled: Optional[bool] = None
     company_id: Optional[int] = Field(default=None, foreign_key="company.id")
+class User(UserBase,table = True):
+    password: Optional[str] = None
+    disabled: Optional[bool] = False
+    id: Optional[int] = Field(default=None, primary_key=True)
+    # company_id: Optional[int] = Field(default=None, foreign_key="company.id")
     company : Company = Relationship(back_populates="users")
     jobs: List["Job"] = Relationship(back_populates="user")
     
@@ -52,19 +56,21 @@ class Job(JobBase, table=True):
     user_id: Optional[int] = Field(default=None, foreign_key="user.id")
     user: User = Relationship(back_populates="jobs")
 
-class UserCreate(SQLModel):
+class UserCreate(UserBase):
     username: str
     password: str
     email : Optional[str] = None
     company_id: Optional[int] = None
 
 
-class UserRead(SQLModel):
+class UserRead(UserBase):
     id: int
     username: str
     email: str
     full_name: Optional[str] = None
 
+class UserUpdate(UserBase):
+    password: Optional[str] = None
 
 # 定义ReadCompany、CreateCompany、UpdateCompany、DeleteCompany类
 class CompanyRead(CompanyBase):

@@ -13,7 +13,7 @@ from requests import session
 from rsa import verify
 from sqlmodel import Session
 
-from app.model.model import UserReadWithCompany
+from app.model.model import User, UserReadWithCompany
 from app.model.user import UserService, createUser,UserCreate, UserRead
 from app.utils.db import get_session
 
@@ -28,15 +28,15 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
-# fake_users_db = {
-#     "johndoe": {
-#         "username": "johndoe",
-#         "full_name": "John Doe",
-#         "email": "johndoe@example.com",
-#         "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
-#         "disabled": False,
-#     }
-# }
+""" fake_users_db = {
+    "johndoe": {
+        "username": "johndoe",
+        "full_name": "John Doe",
+        "email": "johndoe@example.com",
+        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
+        "disabled": False,
+    }
+} """
 
 class Token(BaseModel):
     access_token: str
@@ -47,7 +47,7 @@ class TokenData(BaseModel):
     username: Union[str, None] = None
 
 
-class User(BaseModel):
+""" class User(BaseModel):
     username: str
     email: Union[str, None] = None
     full_name: Union[str, None] = None
@@ -55,7 +55,7 @@ class User(BaseModel):
 
 
 class UserInDB(User):
-    hashed_password: str
+    hashed_password: str """
 
 #计算密码哈希用
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

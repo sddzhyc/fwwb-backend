@@ -22,13 +22,16 @@ router = APIRouter(
 
 
 @router.post("/upload")
-async def upload_file(file: UploadFile ):
-    file_contents = await file.read()
-    # 你可以在这里处理文件内容，例如保存到磁盘或者存储到数据库
-    #保存到磁盘
-    with open(f"upload/{file.filename}", "wb") as f:
-        f.write(file_contents)
-    return {"filename": file.filename}
+async def upload_file(files: list[UploadFile] ):
+    for file in files:
+        if file.content_type not in ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"] :
+            return Response(content={"message":"PDFs, doc, or docx only"}, status_code=422)
+        file_contents = await file.read()
+        # 你可以在这里处理文件内容，例如保存到磁盘或者存储到数据库
+        #保存到磁盘
+        with open(f"upload/{file.filename}", "wb") as f:
+            f.write(file_contents)
+    return {"filenames": [file.filename for file in files]}
 
 @router.get("/resumes/", response_model= List[Resume])
 def getMyResume(current_user: User = Depends(get_current_active_user)):
