@@ -10,6 +10,7 @@ from pymongo.server_api import ServerApi
 # from app.utils.noSQL import createClient
 from fastapi import HTTPException
 from bson.objectid import ObjectId
+from app.model import company
 from app.routers import resume
 from app.utils.encrypt import CrypteService
 
@@ -57,12 +58,23 @@ class Project(BaseModel):
     end_date: Optional[str] = None
     project_description: Optional[str] = None
 
+class WorkExperience(BaseModel):
+    experience_name: Optional[str] = None
+    company_name: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    location : Optional[str] = None
+    description: Optional[str] = None
+
 class ResumeBase(BaseModel):
+    resume_name : Optional[str] = None
     personal_info: Optional[PersonalInfo] = None
     education_experience: Optional[List[Education]] = None
     professional_skills: Optional[Skill] = None
     project_experience:  Optional[List[Project]] = None
-    
+    work_experience : Optional[List[WorkExperience]] = None
+    #个人评价
+    self_evaluation: Optional[str] = None
 class Resume(ResumeBase):
     user_id: Optional[int] = None
     resume_id : Optional[str] = None  # 用于区分同一用户的简历（需要吗？） 

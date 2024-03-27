@@ -16,15 +16,15 @@ def read_jobs(offset: int = 0, limit: int = Query(default=100, le=100)):
         return jobes
 
 
-@router.post("/jobs/", response_model=JobRead)
+@router.post("/jobs/", response_model=List[JobRead])
 # 使用Depends获取session
-def create_job(*, jobCreate: Jobcreate, current_user: User = Depends(get_current_active_user),session = Depends(get_session)):
+def create_job(*, jobCreateList: List[Jobcreate], current_user: User = Depends(get_current_active_user),session = Depends(get_session)):
 
     # job.username = current_user.username
     # with get_session() as session:
     service = JobService(session)
     # print(current_user.id)
-    return service.create_job(jobCreate, current_user.id) # type: ignore
+    return service.create_jobs(jobCreateList, current_user.id) # type: ignore
 
 @router.get("/jobs/{job_id}", response_model=JobReadWithUser)
 def read_job(job_id: int, session: Session = Depends(get_session)):
@@ -37,7 +37,13 @@ def read_job(job_id: int, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Hero not found")
     return job
 
+@router.get("/jobs/", response_model=List[JobRead])
+# 使用Depends获取session
+def get_my_job(*,current_user: User = Depends(get_current_active_user),session = Depends(get_session)):
 
+    service = JobService(session)
+    # print(current_user.id)
+    return service.get_my_job(current_user.id) # type: ignore
 # @router.patch("/jobs/{job_id}", response_model=JobRead)
 # def update_job(job_id: int, job: JobUpdate):
 #     print(job.description)

@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from sqlmodel import Session, create_engine, select
-from typing import Optional
+from typing import List, Optional
 from app.model.model import Job, JobBase
 from .model import CompanyRead
 from .model import UserReadWithCompany
@@ -32,15 +32,24 @@ class JobService:
         if not job:
             raise HTTPException(status_code=404, detail="Job not found")
         return job
-
-    def create_job(self, jobCreate: Jobcreate, user_id: int):
-        db_job = Job.model_validate(jobCreate, update={"user_id": user_id}) # 从jobCreate创建一个从jobCreate创建一个Job实例，但忽略Job中没有的属性
+    # TODO:实现根据用户Id查询Job
+    def get_my_job(self, user_id: int) -> List[Job]:
+        jobs = self.session.get(Job, user_id)
+        if not jobs:
+            raise HTTPException(status_code=404, detail="Job not found")
+        return jobs
+    
+    def create_jobs(self, jobCreateList: List[Jobcreate], user_id: int):
+        db_jobList = []
+        for jobCreate in jobCreateList:
+            db_job = Job.model_validate(jobCreate, update={"user_id": user_id}) # 从jobCreate创建一个从jobCreate创建一个Job实例，但忽略Job中没有的属性
         # 以下写法也可以
         # db_job = Job.model_validate(jobCreate)
         # db_job.user_id = user_id
-        self.session.add(instance=db_job)
-        self.session.commit()
-        self.session.refresh(db_job)
+            self.session.add(instance=db_job)
+            self.session.commit()
+            self.session.refresh(db_job)
+            db_jobList.append(db_job)
         return db_job
 
     def update_job(self, job_id: int, jobUpdate: JobUpdate):
