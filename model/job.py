@@ -42,15 +42,13 @@ class JobService:
     def create_jobs(self, jobCreateList: List[Jobcreate], user_id: int):
         db_jobList = []
         for jobCreate in jobCreateList:
-            db_job = Job.model_validate(jobCreate, update={"user_id": user_id}) # 从jobCreate创建一个从jobCreate创建一个Job实例，但忽略Job中没有的属性
-        # 以下写法也可以
-        # db_job = Job.model_validate(jobCreate)
-        # db_job.user_id = user_id
+            db_job = Job.model_validate(jobCreate, update={"user_id": user_id}) 
             self.session.add(instance=db_job)
-            self.session.commit()
-            self.session.refresh(db_job)
             db_jobList.append(db_job)
-        return db_job
+        self.session.commit()  # 将提交移出循环
+        for db_job in db_jobList:
+            self.session.refresh(db_job)
+        return db_jobList  # 返回整个列表，而不是最后一个元素
 
     def update_job(self, job_id: int, jobUpdate: JobUpdate):
         job = self.session.get(Job, job_id)

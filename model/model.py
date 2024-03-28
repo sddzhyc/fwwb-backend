@@ -40,7 +40,7 @@ class JobBase(SQLModel):
     education: int #    
     description: str
     positionType: Optional[int] = None #职位类型id
-    Location : Optional[str] = None #工作地点，代码(具体到城市)
+    location : Optional[str] = None #工作地点，代码(具体到城市)
     address : Optional[str] = None #工作详细地址，字符串表示
     tags : Optional[str] = None  #职位标签，json格式的数组序列化后存储
 
