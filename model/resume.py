@@ -1,4 +1,5 @@
 from hmac import new
+from os import link
 import re
 from tkinter import N
 from typing import List, Optional
@@ -40,8 +41,7 @@ class PersonalInfo(BaseModel):
 class Education(BaseModel):
     school_name: Optional[str] = None
     degree: Optional[str] = None
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None
+    date : Optional[List[str]] = None
     major: Optional[str] = None
     main_courses: Optional[str] = None
     ranking: Optional[str] = None
@@ -54,15 +54,14 @@ class Skill(BaseModel):
 class Project(BaseModel):
     project_name: Optional[str] = None
     project_role: Optional[str] = None
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None
+    link: Optional[str] = None
+    date : Optional[List[str]] = None
     project_description: Optional[str] = None
 
 class WorkExperience(BaseModel):
     experience_name: Optional[str] = None
     company_name: Optional[str] = None
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None
+    date : Optional[List[str]] = None
     location : Optional[str] = None
     description: Optional[str] = None
 
