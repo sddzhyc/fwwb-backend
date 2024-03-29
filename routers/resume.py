@@ -11,6 +11,7 @@ from app.model import resume
 from app.model.resume import Resume, ResumeCreate, ResumeResponse, ResumeService, ResumeUpdate
 from app.routers.Login_v2 import get_current_active_user
 from app.utils.noSQL import createClient
+from app.utils.resumeFileExtract import convertFormate, parseFile
 from ..model.model import User
 
 router = APIRouter(
@@ -23,6 +24,7 @@ router = APIRouter(
 
 @router.post("/upload")
 async def upload_file(files: list[UploadFile] ):
+    resumeDataList = []
     for file in files:
         if file.content_type not in ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"] :
             return Response(content={"message":"PDFs, doc, or docx only"}, status_code=422)
@@ -31,7 +33,14 @@ async def upload_file(files: list[UploadFile] ):
         #保存到磁盘
         with open(f"upload/{file.filename}", "wb") as f:
             f.write(file_contents)
-    return {"filenames": [file.filename for file in files]}
+        # 解析简历数据
+        res_js = parseFile(f"upload/{file.filename}")
+        resumeData = convertFormate(res_js)
+        # 重新命名数据
+        resumeData["resume_name"] = file.filename
+        resumeDataList.append(resumeData)
+    # return {"filenames": [file.filename for file in files]}
+    return resumeDataList
 
 @router.get("/resumes/", response_model= List[Resume])
 def getMyResume(current_user: User = Depends(get_current_active_user)):
