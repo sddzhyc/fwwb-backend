@@ -37,9 +37,8 @@ def read_job(job_id: int, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Hero not found")
     return job
 
-@router.get("/jobs/", response_model=List[JobRead])
-# 使用Depends获取session
-def get_my_job(*,current_user: User = Depends(get_current_active_user),session = Depends(get_session)):
+@router.get("/my_jobs/", response_model=List[JobRead])
+def get_my_job(current_user: User = Depends(get_current_active_user),session = Depends(get_session)):
 
     service = JobService(session)
     # print(current_user.id)
