@@ -1,11 +1,12 @@
 from typing import Union , Optional
 
 from pydantic import BaseModel
-from fastapi import UploadFile, File, Response
+from fastapi import HTTPException, UploadFile, File, Response
 from typing import List
 # app = FastAPI()
 from fastapi import APIRouter, Depends
 from fastapi_cache.decorator import cache
+from sqlalchemy import exists
 
 from app.model import resume
 from app.model.resume import Resume, ResumeCreate, ResumeResponse, ResumeService, ResumeUpdate
@@ -55,7 +56,10 @@ def getMyResume(current_user: User = Depends(get_current_active_user)):
 def getResume(resume_id: str, current_user: User = Depends(get_current_active_user)):
     
     service = ResumeService(createClient())
-    
+    #验证用户是否有权限查看
+    exist_resume = service.get_resume(resume_id)
+    if exist_resume.user_id != current_user.id:
+        raise HTTPException(status_code = 401, detail = "您没有查看权限！" )
     return service.get_resume(resume_id=resume_id)
 
 @router.post("/resumes/", response_model= ResumeResponse )
@@ -65,16 +69,45 @@ def createResume(resume: ResumeCreate, current_user: User = Depends(get_current_
     
     return service.create_resume(resume, current_user.id)
 
-@router.patch("/resumes/{resume_id}", response_model= Resume)
-def updateResume(resume_id: str, resume: ResumeUpdate):
+@router.patch("/resumes/{resume_id}", response_model= Resume,)
+def updateResume(resume_id: str, resumeUpdate: ResumeUpdate ,current_user: User = Depends(get_current_active_user)):
     
     service = ResumeService(createClient())
-    
-    return service.update_resume(resume_id, resume)
+    #验证用户是否有权限修改
+    exist_resume = service.get_resume(resume_id)
+    if exist_resume.user_id != current_user.id :
+        raise HTTPException(status_code = 401, detail = "您没有修改权限！" )
+    #检查isPublic字段是否设为了True
+    if resumeUpdate.isPublic == True and exist_resume.isPublic != True:
+
+        resumeList = service.get_my_resume(current_user.id)
+        for resume in resumeList:
+            if resume.isPublic :
+                resume.isPublic = False
+                service.update_resume(resume.resume_id, resume)
+
+    return service.update_resume(resume_id, resumeUpdate)
 
 @router.delete("/resumes/{resume_id}")
-def deleteResume(resume_id: str):
-    
+def deleteResume(resume_id: str, current_user: User = Depends(get_current_active_user)):
     service = ResumeService(createClient())
+    exist_resume = service.get_resume(resume_id)
+    if exist_resume.user_id != current_user.id :
+        raise HTTPException(status_code = 401, detail = "您没有删除权限！" )
     
     return service.delete_resume(resume_id)
+
+@router.get("/resumes/getUserResume/{user_id}", response_model= Resume)
+def getResume(user_id: str, current_user: User = Depends(get_current_active_user)):
+    
+    service = ResumeService(createClient())
+    resumeList = service.get_my_resume(user_id)
+    publicResume = None
+    # 遍历，选取isPublic = True的resume
+    for resume in resumeList:
+        if resume.isPublic :
+            publicResume = resume
+    if publicResume == None :
+        raise HTTPException(status_code = 404, detail = "该用户没有公开的简历！" )
+
+    return publicResume

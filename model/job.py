@@ -69,10 +69,12 @@ class JobService:
         self.session.refresh(job)
         return job_data
 
-    def delete_job(self, job_id: int):
+    def delete_job(self, job_id: int, current_user ):
         job = self.session.get(Job, job_id)
         if not job:
             raise HTTPException(status_code=404, detail="Job not found")
+        if current_user.id != job.user_id :
+            raise HTTPException(status_code = 401, detail = "您没有删除权限！" )
         self.session.delete(job)
         self.session.commit()
         return {"ok": True}

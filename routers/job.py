@@ -51,12 +51,14 @@ def get_my_job(current_user: User = Depends(get_current_active_user),session = D
 #         return service.update_job(job_id, job)
 
 @router.patch("/jobs/{job_id}", response_model=JobRead)
-def update_job(job_id: int, job: JobUpdate):
+def update_job(job_id: int, job: JobUpdate, current_user: User = Depends(get_current_active_user)):
     with getSession() as session:
         # print(JobUpdate.description) 
         db_job = session.get(Job, job_id)
         if not db_job:
             raise HTTPException(status_code=404, detail="job not found")
+        if current_user.id != db_job.user_id :
+            raise HTTPException(status_code = 401, detail = "您没有修改权限！" )
         job_data = job.model_dump(exclude_unset=True)
         db_job.sqlmodel_update(job_data)
         session.add(db_job)
@@ -65,7 +67,7 @@ def update_job(job_id: int, job: JobUpdate):
         return db_job
 
 @router.delete("/jobs/{job_id}", )
-def delete_job(job_id: int):
+def delete_job(job_id: int, current_user: User = Depends(get_current_active_user)):
     with getSession() as session:
         service = JobService(session)
-        return service.delete_job(job_id)
+        return service.delete_job(job_id, current_user)

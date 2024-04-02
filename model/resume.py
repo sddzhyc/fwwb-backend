@@ -11,6 +11,7 @@ from pymongo.server_api import ServerApi
 # from app.utils.noSQL import createClient
 from fastapi import HTTPException
 from bson.objectid import ObjectId
+from sqlalchemy import false
 from app.model import company
 from app.routers import resume
 from app.utils.encrypt import CrypteService
@@ -72,10 +73,12 @@ class ResumeBase(BaseModel):
     professional_skills: Optional[Skill] = None
     project_experience:  Optional[List[Project]] = None
     work_experience : Optional[List[WorkExperience]] = None
+    isPublic : Optional[bool] = False
     #个人评价
     self_evaluation: Optional[str] = None
 class Resume(ResumeBase):
-    user_id: Optional[int] = None
+    # user_id: Optional[int] = None
+    user_id: int
     resume_id : Optional[str] = None  # 用于区分同一用户的简历（需要吗？） 
     # _id : str # 不要命名为_id, 否则会被看作是私有成员变量！
 class ResumeCreate(ResumeBase):
@@ -95,7 +98,7 @@ class ResumeService:
         self.collection = self.db["resume_encrypted"]
     
     def create_resume(self, resume: ResumeCreate, user_id : int):
-        #TODO:实现不把user_id设为Optional就可验证的方法
+        #TODO:(已解决？)实现不把user_id设为Optional就可验证的方法
         # resume.user_id = user_id
         resumeData = resume.model_dump()
         resumeData["user_id"] = user_id
@@ -142,7 +145,7 @@ class ResumeService:
         else:
             raise HTTPException(status_code=404, detail="Resume not found")
     
-    #TODO:目前会修改所有字段，需要修改为只修改传入的字段
+    #TODO:（该问题前端已解决）目前会修改所有字段，需要修改为只修改传入的字段
     def update_resume(self, resume_id: str, resume: ResumeUpdate):
         
         id_to_find = ObjectId(resume_id)
