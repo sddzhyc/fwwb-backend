@@ -34,11 +34,12 @@ async def upload_file(files: list[UploadFile] ):
         with open(f"upload/{file.filename}", "wb") as f:
             f.write(file_contents)
         # 解析简历数据
-        res_js = parseFile(f"upload/{file.filename}")
-        resumeData = convertFormate(res_js)
-        # 重新命名数据
-        resumeData["resume_name"] = file.filename
-        resumeDataList.append(resumeData)
+        # TODO:开发测试阶段将解析简历数据的功能关闭
+        # res_js = parseFile(f"upload/{file.filename}")
+        # resumeData = convertFormate(res_js)
+        # # 重新命名数据
+        # resumeData["resume_name"] = file.filename
+        # resumeDataList.append(resumeData)
     # return {"filenames": [file.filename for file in files]}
     return resumeDataList
 

@@ -2,6 +2,8 @@ from fastapi import FastAPI, HTTPException
 from sqlmodel import Session, create_engine, select
 from typing import List, Optional
 from app.model.model import Job, JobBase
+# from app.model.model import Job  # Import the Job class from the model module
+from app.utils.db import getSession
 from .model import CompanyRead
 from .model import UserReadWithCompany
 class JobRead(JobBase):
@@ -32,12 +34,16 @@ class JobService:
         if not job:
             raise HTTPException(status_code=404, detail="Job not found")
         return job
-    # TODO:实现根据用户Id查询Job
+    
     def get_my_job(self, user_id: int) -> List[Job]:
-        jobs = self.session.get(Job, user_id)
-        print(jobs)
+        # session2 = getSession()
+        # job = session2.exec(select(Job).where(Job.user_id == user_id)).first() 
+        jobs = self.session.exec(select(Job).where(Job.user_id == user_id))
+        #jobs转为list
+        jobs = list(jobs)
+        # print(jobs)
         if not jobs:
-            raise HTTPException(status_code=404, detail="Job not found")
+            raise HTTPException(status_code=404, detail="User not found")
         return jobs
     
     def create_jobs(self, jobCreateList: List[Jobcreate], user_id: int):
