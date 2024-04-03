@@ -98,7 +98,7 @@ def deleteResume(resume_id: str, current_user: User = Depends(get_current_active
     return service.delete_resume(resume_id)
 
 @router.get("/resumes/getUserResume/{user_id}", response_model= Resume)
-def getResume(user_id: str, current_user: User = Depends(get_current_active_user)):
+def getResume(user_id: int, current_user: User = Depends(get_current_active_user)):
     
     service = ResumeService(createClient())
     resumeList = service.get_my_resume(user_id)
@@ -107,6 +107,7 @@ def getResume(user_id: str, current_user: User = Depends(get_current_active_user
     for resume in resumeList:
         if resume.isPublic :
             publicResume = resume
+            print(publicResume)
     if publicResume == None :
         raise HTTPException(status_code = 404, detail = "该用户没有公开的简历！" )
 
