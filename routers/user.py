@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.model.user import UserService
 from app.routers.Login_v2 import get_current_active_user
+from app.routers.Login_v2 import get_password_hash
 from app.utils.db import get_session
 
 router = APIRouter(
@@ -15,11 +16,9 @@ router = APIRouter(
     # dependencies=[Depends(get_current_active_user)],
     responses={404: {"description": "Not found"}},
 )
-@router.patch("/{user_id}", response_model=UserRead)
-def update_user(user_id: int, update: UserUpdate, current_user :User = Depends(get_current_active_user), session: Session = Depends(get_session)):
-    if (user_id == current_user.id):
-        userService = UserService(session) 
-        return userService.updateUser(user_id, update)
-    else:
-        raise HTTPException(status_code=403, detail="You can only update your own user")
-
+@router.patch("/user", response_model=UserRead)
+def update_user(update: UserUpdate, current_user :User = Depends(get_current_active_user), session: Session = Depends(get_session)):
+    userService = UserService(session) 
+    #密码转为哈希值
+    update.password = get_password_hash(update.password)
+    return userService.updateUser(current_user.id, update)
