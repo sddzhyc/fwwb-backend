@@ -39,6 +39,3 @@ def update_item(item_id: int, item: Item):
 @router.post("/login")
 async def login(username: str, password: str, vertify: Optional[str] = None):
     return {"username": username, "password": password}
-
-
-

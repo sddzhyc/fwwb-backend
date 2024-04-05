@@ -10,7 +10,7 @@ class JobRead(JobBase):
     id: int
     # description: Optional[str] = None
 class Jobcreate(JobBase):
-    pass
+    user_id : Optional[int] = None
 
 class JobUpdate(JobBase):
     maxSalary: Optional[int] = None
@@ -41,15 +41,18 @@ class JobService:
         jobs = self.session.exec(select(Job).where(Job.user_id == user_id))
         #jobs转为list
         jobs = list(jobs)
-        # print(jobs)
-        if not jobs:
-            raise HTTPException(status_code=404, detail="User not found")
+        print(jobs)
+        # if not jobs:
+        #     raise HTTPException(status_code=404, detail="User not found")
         return jobs
     
     def create_jobs(self, jobCreateList: List[Jobcreate], user_id: int):
         db_jobList = []
         for jobCreate in jobCreateList:
-            db_job = Job.model_validate(jobCreate, update={"user_id": user_id}) 
+            db_job = Job.model_validate(jobCreate, update={"user_id": user_id})
+            # db_job = jobCreate
+            # db_job.user_id = user_id
+            print("job创建:",db_job)
             self.session.add(instance=db_job)
             db_jobList.append(db_job)
         self.session.commit()  # 将提交移出循环

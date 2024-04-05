@@ -1,8 +1,6 @@
 
 from typing import List, Optional
 from fastapi import HTTPException
-from requests import session
-from rsa import verify
 # from fastapi import Depends, FastAPI, HTTPException, Query
 from sqlalchemy import false
 from sqlmodel import Field, Relationship, Session, SQLModel, create_engine, select

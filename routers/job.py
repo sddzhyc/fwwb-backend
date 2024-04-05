@@ -19,7 +19,7 @@ def read_jobs(offset: int = 0, limit: int = Query(default=100, le=100)):
 @router.post("/jobs", response_model=List[JobRead])
 # 使用Depends获取session
 def create_job(*, jobCreateList: List[Jobcreate], current_user: User = Depends(get_current_active_user),session = Depends(get_session)):
-
+    print("/jobs POST接收的：",jobCreateList)
     # job.username = current_user.username
     # with get_session() as session:
     service = JobService(session)

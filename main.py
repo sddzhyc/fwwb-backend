@@ -4,7 +4,7 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.routers import aiLab, company, evalution, jobRecommed, positionRecommed, resume, user
+from app.routers import aiLab, company, evalution, jobRecommed, positionRecommed, recuitRecommend, resume, user
 #解决跨域问题
 origins = [
     "http://localhost", 
@@ -59,7 +59,7 @@ app.include_router(router=aiLab.router)
 app.include_router(router=evalution.router)
 app.include_router(positionRecommed.router)
 app.include_router(jobRecommed.router)
-
+app.include_router(recuitRecommend.router)
 # app.include_router(
 #     admin.router,
 #     prefix="/admin",
