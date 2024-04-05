@@ -7,7 +7,7 @@ port = 3306
 database = "fwwb"
 mysql_url = f"mysql+pymysql://{username}:{password}@{host}:{port}/{database}"
 
-engine = create_engine(mysql_url)
+engine = create_engine(mysql_url, pool_size=100, max_overflow=2000)
 # engine = create_engine(mysql_url, echo=True,)
 
 def create_db_and_tables():

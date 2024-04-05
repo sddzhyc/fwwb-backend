@@ -74,7 +74,7 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-def authenticate_user(username: str, password: str ,session: Session = Depends(get_session) ) :
+def authenticate_user(username: str, password: str,session: Session) :
     userService = UserService(session)
     user = userService.getUser( username)
     if not user:
@@ -125,11 +125,12 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
 
 
 @router.post("/token")
-async def login_for_access_token(
+def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends()
+    ,session: Session = Depends(get_session)
 ) -> Token:
     # user = authenticate_user(fake_users_db, form_data.username, form_data.password)
-    user = authenticate_user( form_data.username, form_data.password)
+    user = authenticate_user( form_data.username, form_data.password, session)
 
     if not user:
         raise HTTPException(

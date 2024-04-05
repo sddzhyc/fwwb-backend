@@ -11,9 +11,6 @@ from pymongo.server_api import ServerApi
 # from app.utils.noSQL import createClient
 from fastapi import HTTPException
 from bson.objectid import ObjectId
-from sqlalchemy import false
-from app.model import company
-from app.routers import resume
 from app.utils.encrypt import CrypteService
 
 def createClient():

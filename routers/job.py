@@ -8,15 +8,15 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 router = APIRouter()
-
-@router.get("/jobs/", response_model=List[JobRead])
+# TODO:前后端统一路由，末尾不加/，避免307重定向
+@router.get("/jobs", response_model=List[JobRead])
 def read_jobs(offset: int = 0, limit: int = Query(default=100, le=100)):
     with getSession() as session:
         jobes = session.exec(select(Job).offset(offset).limit(limit)).all()
         return jobes
 
 
-@router.post("/jobs/", response_model=List[JobRead])
+@router.post("/jobs", response_model=List[JobRead])
 # 使用Depends获取session
 def create_job(*, jobCreateList: List[Jobcreate], current_user: User = Depends(get_current_active_user),session = Depends(get_session)):
 
@@ -37,7 +37,7 @@ def read_job(job_id: int, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Hero not found")
     return job
 
-@router.get("/my_jobs/", response_model=List[JobRead])
+@router.get("/my_jobs", response_model=List[JobRead])
 def get_my_job(current_user: User = Depends(get_current_active_user),session = Depends(get_session)):
 
     service = JobService(session)
