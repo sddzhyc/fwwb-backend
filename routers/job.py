@@ -10,11 +10,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 router = APIRouter()
 # TODO:前后端统一路由，末尾不加/，避免307重定向
 @router.get("/jobs", response_model=List[JobRead])
-def read_jobs(offset: int = 0, limit: int = Query(default=100, le=100)):
-    with getSession() as session:
-        jobes = session.exec(select(Job).offset(offset).limit(limit)).all()
-        return jobes
-
+def read_jobs(offset: int = 0, limit: int = Query(default=100, le=100),positionType = None, jobType = None, location = None,minSalary = None, maxSalary= None):
+    # with getSession() as session:
+    #     jobes = session.exec(select(Job).offset(offset).limit(limit)).all()
+    #     return jobes
+    service  = JobService(getSession())
+    jobs =  service.getJobsByCondition(offset, limit, positionType, jobType, location, minSalary, maxSalary)
+    return jobs
 
 @router.post("/jobs", response_model=List[JobRead])
 # 使用Depends获取session

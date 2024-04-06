@@ -35,6 +35,28 @@ class JobService:
             raise HTTPException(status_code=404, detail="Job not found")
         return job
     
+    def getJobsByCondition(self, offset: int, limit ,
+                            positionType = None, jobType = None, location = None,minSalary = None, maxSalary= None ) :
+        statement = select(Job)
+        if positionType is not None:
+            statement = statement.where(Job.positionType == positionType)
+        if jobType is not None:
+            statement = statement.where(Job.jobType == jobType)
+        if location is not None:
+            statement = statement.where(Job.location == location)
+        if minSalary is not None:
+            statement = statement.where(Job.minSalary >= minSalary)
+        if maxSalary is not None:
+            statement = statement.where(Job.maxSalary <= maxSalary)
+        
+        statement = statement.offset(offset).limit(limit)
+        jobs = self.session.exec(statement).all()
+        # jobs = self.session.exec(select(Job).where(Job.positionType == positionType, Job.jobType == jobType, 
+        # Job.location == location, 
+        # Job.minSalary >= minSalary, Job.maxSalary <= maxSalary).offset(offset).limit(limit)).all()
+        
+        return jobs
+    
     def get_my_job(self, user_id: int) -> List[Job]:
         # session2 = getSession()
         # job = session2.exec(select(Job).where(Job.user_id == user_id)).first() 
