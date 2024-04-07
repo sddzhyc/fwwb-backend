@@ -1,7 +1,8 @@
 from typing import List, Optional
 from sqlalchemy import Join
 from sqlmodel import Field, Relationship, Session, SQLModel, create_engine, select
-
+from sqlalchemy import Text
+from pydantic import constr
 class CompanyBase(SQLModel):
     name: str
     description: Optional[str] =None
@@ -15,7 +16,6 @@ class Company(SQLModel, table=True):
     # jobs: List["Job"] = Relationship(back_populates="company") #job和company无外键关联就不能加这个字段
 
 class UserBase(SQLModel):
-
     username: Optional[str] = None
     userType: Optional[int] = None #用户类型，0：求职人员，1：招聘人员
     email: Optional[str] = None
@@ -28,7 +28,6 @@ class User(UserBase,table = True):
     # company_id: Optional[int] = Field(default=None, foreign_key="company.id")
     company : Company = Relationship(back_populates="users")
     jobs: List["Job"] = Relationship(back_populates="user")
-    
 class JobBase(SQLModel):
     title: str
     jobType: int # 职位类型id
@@ -36,16 +35,15 @@ class JobBase(SQLModel):
     minSalary: int
     education: int #    
     description: str
+    # description: Optional[constr(max_length=10000)] = Field(default=None)
     positionType: Optional[int] = None #职位类型id
     location : Optional[int] = None #工作地点，代码(具体到城市)
     address : Optional[str] = None #工作详细地址，字符串表示
     tags : Optional[str] = None  #职位标签，json格式的数组序列化后存储
 
-#TODO:重构Job类，提取字段到JobBase类
 class Job(JobBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     # title: str
-    # description: Optional[str]
     # maxSalary: int
     # minSalary: int
     # education: int
@@ -76,7 +74,3 @@ class CompanyRead(CompanyBase):
 
 class UserReadWithCompany(UserRead):
     company: Optional[CompanyRead] = None
-
-
-
-

@@ -21,7 +21,7 @@ from .utils.db import create_db_and_tables
 # app = FastAPI(dependencies=[Depends(create_db_and_tables)])
 app = FastAPI() 
 # app.mount("/static", StaticFiles(directory="templates"), name="static")
-app.mount("/static", StaticFiles(directory="dist"), name="static")
+# app.mount("/static", StaticFiles(directory="dist"), name="static")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
