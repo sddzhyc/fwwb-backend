@@ -12,22 +12,7 @@ from pymongo.server_api import ServerApi
 from fastapi import HTTPException
 from bson.objectid import ObjectId
 from app.utils.encrypt import CrypteService
-
-def createClient():
-    # uriDemo = "mongodb+srv://root:<password>@demo.mysl5zj.mongodb.net/"
-    uri = "mongodb+srv://root:lmsCAoHCBpDYxdgs@demo.mysl5zj.mongodb.net/?retryWrites=true&w=majority&appName=demo"
-    secret = "lmsCAoHCBpDYxdgs"
-# Create a new client and connect to the server
-    client = MongoClient(uri, server_api=ServerApi('1'))
-
-# Send a ping to confirm a successful connection
-    try:
-        client.admin.command('ping')
-        print("Pinged your deployment. You successfully connected to MongoDB!")
-    except Exception as e:
-        print(e)
-    return client
-
+from app.utils.noSQL import createClient
 class PersonalInfo(BaseModel):
     name: Optional[str] = None
     birth_date: Optional[str] = None
@@ -142,7 +127,7 @@ class ResumeService:
         else:
             raise HTTPException(status_code=404, detail="Resume not found")
     
-    #TODO:（该问题前端已解决）目前会修改所有字段，需要修改为只修改传入的字段
+    #（该问题前端已解决）目前会修改所有字段，需要修改为只修改传入的字段
     def update_resume(self, resume_id: str, resume: ResumeUpdate):
         
         id_to_find = ObjectId(resume_id)
@@ -165,59 +150,78 @@ class ResumeService:
         else:
             raise HTTPException(status_code=404, detail="Resume not found")
 
-
+    def get_all_resume_public(self):
+        # id_to_find = ObjectId(resume_id)
+        resume_encrypted_list = self.collection.find({"isPublic": True})
+        
+        crypteService = CrypteService()
+        #对列表中的进行解密
+        resumes = []
+        for resume_encrypted in resume_encrypted_list:
+            resume = crypteService.decrypt_dict(resume_encrypted)
+        # print("resume:",resume)
+            if resume:
+                resume["resume_id"] = str(resume["_id"])
+                resumeClass = Resume(**resume)
+                print("resumeClass:",resumeClass)
+                resumes.append(resumeClass)
+            else:
+                raise HTTPException(status_code=404, detail="Resume not found")
+        return resumes
 
 #test
 def test():
-    resume = Resume(
-            personal_info=PersonalInfo(
-                name="John Doe",
-                birth_date="1990-01-01",
-                sex="Male",
-                phone="1234567890",
-                email="john.doe@example.com",
-                residence="New York"
-            ),
-            education_experience=[
-                Education(
-                    school_name="University of ABC",
-                    degree="Bachelor's Degree",
-                    start_date="2010-09-01",
-                    end_date="2014-06-30",
-                    major="Computer Science",
-                    main_courses="Data Structures, Algorithms",
-                    ranking="First Class",
-                    school_experience_description="Lorem ipsum dolor sit amet"
-                )
-            ],
-            professional_skills=Skill(
-                certificates=["Certificate 1", "Certificate 2"],
-                description=["Skill 1", "Skill 2"]
-            ),
-            project_experience=[
-                Project(
-                    project_name="Project 1",
-                    project_role="Developer",
-                    start_date="2015-01-01",
-                    end_date="2016-12-31",
-                    project_description="Lorem ipsum dolor sit amet"
-                )
-            ],
-            user_id=1,
-            # resume_id
-        )
+    # resume = Resume(
+    #         personal_info=PersonalInfo(
+    #             name="John Doe",
+    #             birth_date="1990-01-01",
+    #             sex="Male",
+    #             phone="1234567890",
+    #             email="john.doe@example.com",
+    #             residence="New York"
+    #         ),
+    #         education_experience=[
+    #             Education(
+    #                 school_name="University of ABC",
+    #                 degree="Bachelor's Degree",
+    #                 start_date="2010-09-01",
+    #                 end_date="2014-06-30",
+    #                 major="Computer Science",
+    #                 main_courses="Data Structures, Algorithms",
+    #                 ranking="First Class",
+    #                 school_experience_description="Lorem ipsum dolor sit amet"
+    #             )
+    #         ],
+    #         professional_skills=Skill(
+    #             certificates=["Certificate 1", "Certificate 2"],
+    #             description=["Skill 1", "Skill 2"]
+    #         ),
+    #         project_experience=[
+    #             Project(
+    #                 project_name="Project 1",
+    #                 project_role="Developer",
+    #                 start_date="2015-01-01",
+    #                 end_date="2016-12-31",
+    #                 project_description="Lorem ipsum dolor sit amet"
+    #             )
+    #         ],
+    #         user_id=1,
+    #         # resume_id
+    #     )
 
     service = ResumeService(createClient())
 
-    result = service.create_resume(resume, 2)
-    print("create_resume:", result)
-    print()
-    print("get_resume:", service.get_my_resume(1))
-    print()
-    resume.personal_info.sex = "girl"
-    print("update_resume:", service.update_resume(1, resume))
-    print()
-    print("delete_resume:", service.delete_resume(1))
+    # result = service.create_resume(resume, 2)
+    # print("create_resume:", result)
+    # print()
+    # print("get_resume:", service.get_my_resume(1))
+    # print()
+    # resume.personal_info.sex = "girl"
+    # print("update_resume:", service.update_resume(1, resume))
+    # print()
+    # print("delete_resume:", service.delete_resume(1))
+    result =  service.get_all_resume_public()
+    print(result)
 
 if __name__ == "__main__":
     test()
