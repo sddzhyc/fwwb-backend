@@ -143,20 +143,3 @@ def login_for_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
     return Token(access_token=access_token, token_type="bearer", username=user.username, userType=user.userType)
-
-
-@router.post("/register", response_model=UserRead)
-async def register(user: UserCreate):
-    user.password = get_password_hash(user.password)
-    return createUser(user)
-
-
-@router.get("/users/me/", response_model=UserReadWithCompany)
-async def read_users_me(current_user: User = Depends(get_current_active_user)):
-    # print(current_user)
-    return current_user
-
-
-@router.get("/users/me/items/")
-async def read_own_items(current_user: User = Depends(get_current_active_user)):
-    return [{"item_id": "Foo", "owner": current_user.username}]

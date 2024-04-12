@@ -63,7 +63,7 @@ class JobService:
         jobs = self.session.exec(select(Job).where(Job.user_id == user_id))
         #jobs转为list
         jobs = list(jobs)
-        print(jobs)
+        # print(jobs)
         # if not jobs:
         #     raise HTTPException(status_code=404, detail="User not found")
         return jobs

@@ -64,7 +64,7 @@ def initUser():
 
 def createUser(userCreate: UserCreate):
     with getSession() as session:
-        userCreate.disabled = False
+        # userCreate.disabled = False
         # db_user = User.model_validate(user, update={"company_id": companyId}) 
         db_user = User.model_validate(userCreate )
         session.add(db_user)
