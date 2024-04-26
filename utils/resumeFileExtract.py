@@ -5,7 +5,7 @@ import requests
 import json
 
 def parseFile(fname =  u'1.docx' ,
-    url = 'http://resumesdk.market.alicloudapi.com/ResumeParser' ):
+    #url = 'http://resumesdk.market.alicloudapi.com/ResumeParser' ):
     # 读取文件内容
     fileDir = "./upload"
     # cont = open(f'{fileDir}/{fname}', 'rb').read()
@@ -21,7 +21,7 @@ def parseFile(fname =  u'1.docx' ,
             'ocr_type': 1,                 # 1为高级ocr
             }
     
-    appcode = '393d056a692c43a199e021947c06b326'
+    appcode = '' #填入第三方密钥
     headers = {'Authorization': 'APPCODE ' + appcode,
                'Content-Type': 'application/json; charset=UTF-8',
                }
