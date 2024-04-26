@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from dashscope import Generation
 import dashscope
-dashscope.api_key = 'sk-afc61e5db6a0476886909c952a0acac8'  # 填入第一步获取的APIKEY
+dashscope.api_key = ''  # 填入获取的APIKEY
 
 def call_with_stream():
     conversation_history = []  # 用于记录对话历史
